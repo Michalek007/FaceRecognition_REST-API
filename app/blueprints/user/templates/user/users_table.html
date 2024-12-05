@@ -1,0 +1,31 @@
+{% extends "table_base.html" %}
+
+            {% block title %}
+                Users
+            {% endblock %}
+            {%  block table_heading %}
+                        <th onclick="sortTable(0)">ID</th>
+                        <th onclick="sortTable(1)">USERNAME</th>
+                        <th onclick="sortTable(2)">PW_HASH</th>
+            {% endblock %}
+
+            {% block url %}
+                '{{ url_for('user.users') }}'
+            {% endblock %}
+            {% block for_each %}
+                data = data.users
+                data.forEach(item => {
+                        const row = tableBody.insertRow();
+                        const cell1 = row.insertCell(0);
+                        const cell2 = row.insertCell(1);
+                        const cell3 = row.insertCell(2);
+
+                        cell1.textContent = item.id;
+                        cell2.textContent = item.username;
+                        cell3.textContent = item.pw_hash;
+                });
+            {% endblock %}
+
+{% block body %}
+    {{ super() }}
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block body %}
+<div class="center">
+    <h1 class="center"> Microcontrollers API </h1>
+    <form action="{{url_for('auth.login')}}" method='POST'>
+        <div>
+            <label for='login'></label><input class="white_text" type='text' name='login' id='login' placeholder='login'/>
+        </div>
+        <div>
+            <label for='password'></label><input class="white_text" type='password' name='password' id='password' placeholder='password'/>
+        </div>
+        <div>
+            <input class="button" type='submit' name='submit'/>
+        </div>
+    </form>
+    <a id='register' class="white_text" href="{{ url_for('user.register')}}"> You don`t have account? Click to register. </a>
+</div>
+{% endblock %}

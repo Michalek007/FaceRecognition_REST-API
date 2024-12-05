@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block navbar %}
+    {{ super() }}
+{% endblock %}
+
+{% block body %}
+
+    <h1>
+    {%  block title %} {% endblock %}
+    </h1>
+    <label for="search-bar"></label><input type="text" id="search-bar" placeholder="Search by phrase">
+
+    <table id="data-table">
+        <thead>
+            <tr>
+                {%  block table_heading%}
+
+                {% endblock %}
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table rows will be dynamically added here -->
+        </tbody>
+    </table>
+
+    <div id="bottom-right-options">
+        <label for="rowsPerPage">Rows per page:</label>
+        <select id="rowsPerPage">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50" selected>50</option>
+            <option value="100">100</option>
+        </select>
+    </div>
+
+    <div id="bottom-left-options">
+        <label for="pageNumber">Page:</label>
+        <select id="pageNumber" disabled>
+        </select>
+    </div>
+
+    <script>
+        {% block fetch_data %}
+
+        {%  endblock %}
+        // Function to fetch data from the API
+        function fetchData() {
+            fetch(
+                {% block url %}
+                    'https://jsonplaceholder.typicode.com/posts'
+                {% endblock %}
+            ).then(response => response.json())
+                .then(data => {
+                    const tableBody = document.querySelector('#data-table tbody');
+                    tableBody.innerHTML = '';
+                    {% block for_each %}
+                    data.forEach(item => {
+                            const row = tableBody.insertRow();
+                            const cell1 = row.insertCell(0);
+                            const cell2 = row.insertCell(1);
+                            const cell3 = row.insertCell(2);
+
+                            cell1.textContent = item.id;
+                            cell2.textContent = item.title;
+                            cell3.textContent = item.body;
+                    });
+                    {% endblock %}
+
+                    display_rows_per_page();
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                });
+        }
+        // Function to filter and sort the table by column index
+        function sortTable(columnIndex) {
+            const table = document.getElementById('data-table');
+            const rows = Array.from(table.rows).slice(1); // Exclude the header row
+            const isAscending = table.rows[0].cells[columnIndex].classList.contains('asc');
+
+            // Sort the rows based on the content of the selected column
+            rows.sort((a, b) => {
+                const textA = a.cells[columnIndex].textContent;
+                const textB = b.cells[columnIndex].textContent;
+
+                return isAscending ? textA.localeCompare(textB) : textB.localeCompare(textA);
+            });
+
+            // Update the sorting indicator class
+            for (const th of table.rows[0].cells) {
+                th.classList.add('asc', 'desc');
+            }
+            table.rows[0].cells[columnIndex].classList.toggle(isAscending ? 'asc' : 'desc');
+
+            // Reorder the table rows
+            for (const row of rows) {
+                table.tBodies[0].appendChild(row);
+            }
+            updatePageNumbers();
+        }
+
+        function display_rows_per_page() {
+            const el = document.getElementById('rowsPerPage')
+            const numRows = parseInt(el.value, 10);
+            const tableBody = document.querySelector('#data-table tbody');
+            const rows = Array.from(tableBody.rows);
+
+            // Hide or show rows based on the selected number of rows per page
+            rows.forEach((row, index) => {
+                if (index < numRows) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Reset the page to 1 after changing the number of rows per page
+            document.getElementById('pageNumber').value = '1';
+
+            // Update page numbers based on the displayed rows
+            updatePageNumbers();
+        }
+
+        // Function to update the page numbers based on the displayed rows
+        function updatePageNumbers() {
+            const rowsPerPage = parseInt(document.getElementById('rowsPerPage').value, 10);
+            const tableBody = document.querySelector('#data-table tbody');
+            const rows = Array.from(tableBody.rows);
+            const totalPages = Math.ceil(rows.length / rowsPerPage);
+
+            // Update the page numbers select element
+            const pageNumberSelect = document.getElementById('pageNumber');
+            pageNumberSelect.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const option = document.createElement('option');
+                option.value = i.toString();
+                option.textContent = i.toString();
+                pageNumberSelect.appendChild(option);
+            }
+
+            // Enable or disable the page number select based on the total pages
+            pageNumberSelect.disabled = totalPages <= 1;
+        }
+
+        document.getElementById('search-bar').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('#data-table tbody tr');
+
+            tableRows.forEach(row => {
+                const rowData = row.textContent.toLowerCase();
+                if (rowData.includes(searchTerm)) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+                updatePageNumbers();
+            });
+        });
+
+         // Function to handle changes in the number of rows displayed
+        document.getElementById('rowsPerPage').addEventListener('change', function () {
+            const numRows = parseInt(this.value, 10);
+            const tableBody = document.querySelector('#data-table tbody');
+            const rows = Array.from(tableBody.rows);
+
+            // Hide or show rows based on the selected number of rows per page
+            rows.forEach((row, index) => {
+                if (index < numRows) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            // Reset the page to 1 after changing the number of rows per page
+            document.getElementById('pageNumber').value = '1';
+
+            // Update page numbers based on the displayed rows
+            updatePageNumbers();
+        });
+
+        // Function to handle changes in the selected page number
+        document.getElementById('pageNumber').addEventListener('change', function () {
+            const selectedPage = parseInt(this.value, 10);
+            const rowsPerPage = parseInt(document.getElementById('rowsPerPage').value, 10);
+            const tableBody = document.querySelector('#data-table tbody');
+            const rows = Array.from(tableBody.rows);
+
+            // Calculate the start and end indexes for the selected page
+            const startIndex = (selectedPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+
+            // Show the rows for the selected page and hide others
+            rows.forEach((row, index) => {
+                if (index >= startIndex && index < endIndex) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Call the fetchData function to fetch and display the data
+        fetchData();
+    </script>
+{% endblock %}

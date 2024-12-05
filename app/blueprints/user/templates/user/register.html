@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <div class="center">
+        <h1 class="center"> Create an account </h1>
+        <form action="{{url_for('user.register')}}" method='POST'>
+            <div>
+                <label for='login'></label><input class="white_text" type='text' name='login' id='login' placeholder='login'/>
+            </div>
+            <div>
+                <label for='password'></label><input class="white_text" type='password' name='password' id='password' placeholder='password'/>
+            </div>
+            <div>
+                <label for='repeat_password'></label><input class="white_text" type='password' name='repeat_password' id='repeat_password' placeholder='repeat password'/>
+            </div>
+            <div>
+                <input class="button" type='submit' name='submit'/>
+            </div>
+        </form>
+    </div>
+{% endblock %}

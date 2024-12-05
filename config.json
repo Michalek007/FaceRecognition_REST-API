@@ -1,0 +1,12 @@
+{
+  "metadata" : {
+        "VERSION": "1.0.0.0",
+        "PROJECT_NAME": "Microcontrollers API",
+        "CHANGELOGS": "Initial deployment",
+        "AUTHOR": "Michał Nizioł"
+  },
+  "options" : {
+        "RUN_FILE": "\\run.bat",
+        "VENV_SETUP_FILE": "\\venvSetup.bat"
+  }
+}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <script>
+      function getData() {
+        fetch("{{url_for('details.app_details')}}")
+          .then(response => response.json())
+          .then(data => {
+             const container = document.getElementById('data-container');
+            container.innerHTML = `
+            <div class="white_text">
+                <li>
+                    <h3>Project name:</h3>
+                    <p> ${data["ProjectName"]} </p>
+                </li>
+                <li>
+                    <h3>Version:</h3>
+                    <p> ${data["Version"]} </p>
+                </li>
+                <li>
+                    <h3>Root directory:</h3>
+                    <p> ${data["RootDirectory"]} </p>
+                </li>
+                <li>
+                    <h3>Hostname:</h3>
+                    <p> ${data["HostName"]} </p>
+                </li>
+            </div>`;
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      }
+      getData();
+    </script>
+
+    <h1>App details</h1>
+    <ul id="data-container"></ul>
+{% endblock %}

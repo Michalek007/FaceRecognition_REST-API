@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+     <script>
+      function getData() {
+        fetch("{{url_for('user.protected')}}")
+          .then(response => response.json())
+          .then(data => {
+             const container = document.getElementById('data-container');
+            container.innerHTML = `
+            <div class="white_text">
+                <li>
+                    <h3>Logged user: </h3>
+                    <p> ${data["logged_user"]} </p>
+                </li>
+            </div>`;
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      }
+      getData();
+    </script>
+
+    <h1> Microcontrollers API  </h1>
+    <ul id="data-container"></ul>
+
+{% endblock %}

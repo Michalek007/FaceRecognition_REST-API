@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <script>
+      function getData() {
+        fetch("{{url_for('details.help')}}")
+          .then(response => response.json())
+          .then(data => {
+             const container = document.getElementById('data-container');
+            container.innerHTML = '';
+            const methodsArray = data["api_methods"];
+            for (var key in methodsArray){
+                const element = document.createElement('li');
+                element.className = "white_text"
+                element.innerHTML = `
+                <div class="white_text">
+                    <h3> ${key}:</h3>
+                    <p> ${methodsArray[key]}</p>
+                </div>
+
+                `;
+                container.appendChild(element);
+            }
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      }
+      getData();
+    </script>
+
+    <h1> Methods description </h1>
+    <ul id="data-container"></ul>
+{% endblock %}

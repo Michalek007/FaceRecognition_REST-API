@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block body %}
+     <script>
+          function restart() {
+            fetch("{{url_for('config.restart')}}")
+              .then(response => response.json())
+              .then(data => {
+                  document.getElementById("status").innerText = data["message"];
+              })
+              .catch(error => {
+                console.error(error);
+              });
+              setTimeout(() => {
+                  location.reload();
+              }, 3000)
+          }
+          function kill() {
+            fetch("{{url_for('config.kill')}}")
+              .then(response => response.json())
+              .then(data => {
+                  document.getElementById("status").innerText = data["message"];
+              })
+              .catch(error => {
+                console.error(error);
+              });
+          }
+          function logout() {
+            fetch("{{url_for('user.logout')}}")
+              .then(response => response.json())
+              .then(data => {
+                  document.getElementById("status").innerText = data["message"];
+              })
+              .catch(error => {
+                console.error(error);
+              });
+          }
+    </script>
+
+    <h1> Settings </h1>
+    <button class="button" onclick="restart()"> Restart service </button>
+    <button class="button" onclick="kill()"> Kill service </button>
+    <button class="button" onclick="logout()"> Logout </button>
+    <div class="white_text" id="status"></div>
+
+{% endblock %}
