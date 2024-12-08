@@ -12,9 +12,6 @@ class DetailsBp(BlueprintSingleton):
         from app.blueprints.auth.views import login
         from app.blueprints.user.views import register, logout, protected, users
         from app.blueprints.details.views import app_details
-        from app.blueprints.acc.views import acc, add_acc, delete_acc, update_acc
-        from app.blueprints.controls.views import get_action, update_action
-        from app.blueprints.env_metrics.views import env_metrics, add_env_metrics, update_env_metrics, delete_env_metrics
         return [
             login,
             logout,
@@ -22,16 +19,6 @@ class DetailsBp(BlueprintSingleton):
             register,
             users,
             app_details,
-            acc,
-            add_acc,
-            delete_acc,
-            update_acc,
-            get_action,
-            update_action,
-            env_metrics,
-            add_env_metrics,
-            update_env_metrics,
-            delete_env_metrics
         ]
 
     # private methods

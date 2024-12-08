@@ -184,3 +184,17 @@ table {
 .dropdown:hover .dropdown-content {
     display: block;
 }
+
+.container {
+  display: flex;
+  justify-content: left;
+  align-items: center;
+  width: 100vw;
+  height: auto;
+}
+
+.container img {
+  width: auto;
+  height: 50vh;
+  object-fit: cover;
+}

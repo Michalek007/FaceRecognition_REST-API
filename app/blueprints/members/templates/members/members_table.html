@@ -1,18 +1,18 @@
 {% extends "table_base.html" %}
 
             {% block title %}
-                Env metrics
+                Members
             {% endblock %}
             {%  block table_heading %}
                         <th onclick="sortTable(0)">ID</th>
-                        <th onclick="sortTable(1)">TIMESTAMP</th>
-                        <th onclick="sortTable(2)">TEMPERATURE</th>
-                        <th onclick="sortTable(3)">PRESSURE</th>
-                        <th onclick="sortTable(4)">HUMIDITY</th>
+                        <th onclick="sortTable(1)">USER ID</th>
+                        <th onclick="sortTable(2)">NAME</th>
+                        <th onclick="sortTable(3)">EMBEDDING</th>
+                        <th onclick="sortTable(4)">IMAGE</th>
             {% endblock %}
 
             {% block url %}
-                '{{ url_for('env_metrics.env_metrics') }}'
+                '{{ url_for('members.get') }}'
             {% endblock %}
             {% block for_each %}
                 data = data.output
@@ -25,10 +25,10 @@
                         const cell5 = row.insertCell(4);
 
                         cell1.textContent = item.id;
-                        cell2.textContent = item.timestamp;
-                        cell3.textContent = item.temperature;
-                        cell4.textContent = item.pressure;
-                        cell5.textContent = item.humidity;
+                        cell2.textContent = item.user_id;
+                        cell3.textContent = item.name;
+                        cell4.textContent = item.embedding;
+                        cell5.textContent = item.image;
                 });
             {% endblock %}
 

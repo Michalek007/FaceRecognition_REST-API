@@ -1,13 +1,13 @@
 import os
-import subprocess
 from datetime import datetime, timedelta
 from collections import namedtuple
 import json
+from pathlib import Path
+import socket
 
 
-class Config(object):
-    """ Configuration base, for all environments.
-    """
+class Config:
+    """ Configuration base, for all environments. """
     DEBUG = False
     TESTING = False
     SCHEDULER_API_ENABLED = True
@@ -17,14 +17,22 @@ class Config(object):
         'port': 5000,
     }
     MIN_ACTIVITY_TIME = 15
-    PRIVILEGE_ID = 58
     SECRET_KEY = '87673fa7f3a987323301f129'
     TOKEN = '31024daadeb926bc08b0ca0e'
+    COMPUTER_NAME = socket.gethostname()
     BASEDIR = os.path.abspath(os.path.dirname(__file__))
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASEDIR, 'database\\db\\data.db')
-    COMPUTER_NAME = subprocess.Popen('hostname', shell=True, stdout=subprocess.PIPE).stdout.read().decode()
-    COMPUTER_NAME = COMPUTER_NAME.replace('\r', '').replace('\n', '')
-    CONFIG_FILE = BASEDIR + '\\config.json'
+    DATABASE = os.path.join(BASEDIR, str(Path('database/data/database.db')))
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + DATABASE
+    CONFIG_FILE = os.path.join(BASEDIR, 'config.json')
+    RUN_FILE = os.path.join(BASEDIR, 'run.bat')
+    RESTART_SCRIPT = os.path.join(BASEDIR, str(Path('scripts/restartService.bat')))
+    TEMP_UPLOAD_DIR = os.path.join(BASEDIR, str(Path('app/static/temp')))
+    IMAGES_DIR = os.path.join(BASEDIR, str(Path('database/data/images')))
+    EMBEDDINGS_DIR = os.path.join(BASEDIR, str(Path('database/data/embeddings')))
+
+    for path in (TEMP_UPLOAD_DIR, IMAGES_DIR, EMBEDDINGS_DIR):
+        path_obj = Path(path)
+        path_obj.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def get_project_details():

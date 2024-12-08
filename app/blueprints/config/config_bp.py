@@ -20,7 +20,7 @@ class ConfigBp(BlueprintSingleton):
 
     # views
     def get_pid(self):
-        return jsonify(SERVICE=Pid.SERVICE)
+        return jsonify(service=Pid.SERVICE)
 
     def kill(self):
         self.kill_service()
@@ -28,8 +28,8 @@ class ConfigBp(BlueprintSingleton):
 
     def restart(self):
         self.kill_service()
-        restart_script = f'"{current_app.config.get("BASEDIR")}\\scripts\\restartService.bat"'
-        run_file = f'"{current_app.config.get("BASEDIR")}\\run.bat"'
+        restart_script = current_app.config.get("RESTART_SCRIPT")
+        run_file = current_app.config.get("RUN_FILE")
         self.subprocess.run(f'start {restart_script} {run_file}', stdout=None, stderr=None)
         return jsonify(message='Service is restarting!')
 

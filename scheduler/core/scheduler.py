@@ -16,16 +16,13 @@ class Scheduler:
         self.scheduler = scheduler
         self.db = database
         self.api = api
+        self.app = None
 
         # when new task is needed, create new package in scheduler/tasks (base class: BaseTask)
         # and update factory method (TaskCreator) then add correct TaskType to self.scheduler_jobs attribute
 
         self.scheduler_jobs = [
-            {
-                'task_type': TaskType.Acc,
-                'id': TaskType.Acc.name,
-                'minutes': 1
-            },
+
         ]
 
     def start(self):
@@ -34,6 +31,8 @@ class Scheduler:
 
     def init_app(self, app):
         """ Initialize scheduler with Flask app. """
+        app.config['scheduler'] = self
+        self.app = app
         self.scheduler.init_app(app)
 
     def shut_down(self):

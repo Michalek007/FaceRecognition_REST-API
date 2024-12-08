@@ -14,18 +14,23 @@
 
     <div class="navbar">
         <a href="{{url_for('auth.login')}}"> LOGIN </a>
-        <a href="{{url_for('controls.controls')}}"> CONTROLS </a>
+        <a href="{{url_for('members.upload')}}"> ADD MEMBER </a>
+
+    {% if current_user.id == "admin" %}
         <a href="{{url_for('details.info')}}"> DETAILS </a>
         <a href="{{url_for('details.methods')}}"> METHODS </a>
         <a href="{{url_for('config.settings')}}"> SETTINGS </a>
+
         <div class="dropdown">
             <button class="drop_btn">TABLES</button>
             <div class="dropdown-content">
-                <a href="{{url_for('acc.acc_table')}}">ACC</a>
                 <a href="{{url_for('user.users_table')}}">USERS</a>
-                <a href="{{url_for('env_metrics.env_metrics_table')}}">ENV METRICS</a>
+                <a href="{{url_for('members.table')}}">MEMBERS</a>
             </div>
         </div>
+    {% else %}
+    {% endif %}
+
     </div>
 
 {% endblock %}

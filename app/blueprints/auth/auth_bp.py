@@ -36,7 +36,8 @@ class AuthBp(BlueprintSingleton):
         return user
 
     def unauthorized_handler(self):
-        return jsonify(message='Unauthorized'), 401
+        # return jsonify(message='Unauthorized'), 401
+        return render_template('auth/unauthorized.html'), 401
 
     def base(self):
         return redirect('login')

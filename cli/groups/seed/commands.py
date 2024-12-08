@@ -14,13 +14,7 @@ def users():
     return SeedGroup().users()
 
 
-@seed_cli.command('acc')
-def acc():
-    """ Seeds acc table with tests data. """
-    return SeedGroup().acc()
-
-
-@seed_cli.command('env_metrics')
-def env_metrics():
-    """ Seeds env_metrics table with tests data. """
-    return SeedGroup().env_metrics()
+@seed_cli.command('members')
+def members():
+    """ Seeds members table with tests data. """
+    return SeedGroup().members()

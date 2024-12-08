@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {{ super() }}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+{% endblock %}
+
+{% block body %}
+    <script> </script>
+
+    <h1> Add member </h1>
+    <div class="container">
+        <img src="{{ member_image }}" alt="Member image" />
+    </div>
+
+     <form action="{{url_for('members.new')}}" id="new" method="post">
+        <p class="white_text">Type name of the member:</p>
+        <div class="white_text">
+            <input type="text" class="white_text" name="name" id="name" placeholder='member name'/>
+        </div>
+
+        <div class="white_text">
+            <input type="submit" class="button" id="btn-add" value="Add" />
+        </div>
+    </form>
+
+     <form action="{{url_for('members.upload')}}" id="upload" method="get">
+        <p class="white_text"> If detected person is not the one you wanted to add as the member please upload different image. </p>
+        <div class="white_text">
+            <input type="submit" class="button" id="btn-upload" value="Upload image again" />
+        </div>
+    </form>
+{% endblock %}

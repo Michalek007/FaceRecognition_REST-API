@@ -37,20 +37,18 @@ cli.init()
 def deploy_app_views():
     """ Deploys app views. Should be called before running app. """
     from app.blueprints.auth import auth
-    from app.blueprints.acc import acc
     from app.blueprints.user import user
     from app.blueprints.config import config
     from app.blueprints.details import details
-    from app.blueprints.controls import controls
-    from app.blueprints.env_metrics import env_metrics
+    from app.blueprints.members import members
+    from app.blueprints.face_recognition import face_recognition
 
     app.register_blueprint(auth)
-    app.register_blueprint(acc)
     app.register_blueprint(user)
     app.register_blueprint(config)
     app.register_blueprint(details)
-    app.register_blueprint(controls)
-    app.register_blueprint(env_metrics)
+    app.register_blueprint(members)
+    app.register_blueprint(face_recognition)
 
     from app.views import base
     print("App views deployed!")
