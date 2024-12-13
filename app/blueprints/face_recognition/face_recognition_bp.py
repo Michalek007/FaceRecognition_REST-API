@@ -8,6 +8,9 @@ from app.modules.face_recognition import mtcnn, resnet
 from database.schemas import members_schema, members_many_schema, Members
 from utils import DateUtil
 from app.modules.data_class import TimestampDataClass
+from scheduler.tasks import TaskType
+from app.modules.face_recognition import recognize
+from app.modules.image_utils import RGB565
 
 
 class FaceRecognitionBp(BlueprintSingleton):
@@ -18,53 +21,60 @@ class FaceRecognitionBp(BlueprintSingleton):
     """
     mtcnn = mtcnn
     resnet = resnet
+    MAX_IMAGES_COUNT = 5
 
     def __new__(cls):
         if not isinstance(cls._instance, cls):
             cls._instance = object.__new__(cls)
             cls._instance.img_count = 0
+            cls._instance.test_img_count = 0
         return cls._instance
 
     # views
     def recognize(self):
         aligned = request.args.get('aligned')
         user_id = request.form.get('user_id')
+        in_place = request.form.get('in_place')
         if not user_id:
             user_id = 'admin'
 
-        # filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'cam_{user_id}_{self.img_count}.jpg')
+        print(request.content_type)
+        print(request.content_length)
+
+        if request.content_type == 'application/octet-stream':
+            image_id = f'{user_id}_{self.test_img_count}'
+            filename = os.path.join('test_images', f'cam_{image_id}.jpg')
+            rgb565 = RGB565(image_width=160, image_height=120)
+            img = rgb565.to_pil_image(request.data)
+            try:
+                img.save(filename)
+            except:
+                pass
+            self.test_img_count += 1
+            if self.test_img_count >= 50:
+                self.test_img_count = 0
+            return jsonify(message='Image uploaded successfully!')
+
+        image_id = f'{user_id}_{self.img_count}'
         try:
-            filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'cam_{user_id}_{self.img_count}.jpg')
+            filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'cam_{image_id}.jpg')
             request.files.get('imageFile').save(filename)
             self.img_count += 1
-            if self.img_count > 4:
+            if self.img_count > self.MAX_IMAGES_COUNT-1:
                 self.img_count = 0
         except AttributeError:
-            return jsonify(message=f'File not found in request body!'), 404
+            return jsonify(message='File not found in request body!'), 404
 
-        img = Image.open(filename)
-        self.mtcnn.keep_all = True
-        aligned = self.mtcnn(img)
-        recognized = False
-        if aligned is not None:
-            embeddings = self.resnet(aligned).detach()
-            self.mtcnn.keep_all = False
-    
-            members_list = Members.query.filter_by(user_id=user_id)
-            members_embeddings = []
-            members_names = []
-            for member in members_list:
-                members_embeddings.append(torch.load(member.embedding))
-                members_names.append(member.name)
+        if in_place:
+            response, error = current_app.config.get('db_api').members_get(user_id=user_id)
+            if error:
+                return jsonify(message=error)
+            members_list = response.json()
+            return jsonify(recognized=recognize.run_resnet(filename, members_list, aligned))
 
-            for embedding in embeddings:
-                for i, member_embedding in enumerate(members_embeddings):
-                    distance = (embedding - member_embedding).norm().item()
-                    if distance < 1.0:
-                        recognized = True
-                        print(f'Recognized {members_names[i]}!')
-        if not recognized:
-            print("No members were recognized in the image!")
-
-        # current_app.config.get('scheduler')
-        return jsonify(message=f'Image uploaded successfully with name!')
+        scheduler = current_app.config.get('scheduler')
+        print(len(scheduler.get_jobs()))
+        if len(scheduler.get_jobs()) >= self.MAX_IMAGES_COUNT:
+            return jsonify(message='Images limit has been reached!'), 404
+        scheduler.add_job(TaskType.face_recognition, image_id, 0.01, filename=filename, user_id=user_id, image_id=image_id, aligned=aligned)
+        return jsonify(message='Image uploaded successfully!')

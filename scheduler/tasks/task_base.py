@@ -2,12 +2,12 @@ from abc import ABC, abstractmethod
 from flask_sqlalchemy import SQLAlchemy
 from flask_apscheduler import APScheduler
 
-from utils import ServiceRequestsApi
+from app.modules.service_api import ServiceApi
 
 
 class TaskBase(ABC):
     """ Base class for all tasks. """
-    def __init__(self, scheduler: APScheduler, api: ServiceRequestsApi, database: SQLAlchemy):
+    def __init__(self, scheduler: APScheduler, api: ServiceApi, database: SQLAlchemy):
         self.scheduler = scheduler
         self.api = api
         self.db = database

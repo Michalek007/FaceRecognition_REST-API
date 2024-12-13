@@ -43,7 +43,8 @@ class UserBp(BlueprintSingleton):
 
     def logout(self):
         flask_login.logout_user()
-        return jsonify(message='Logged out.')
+        # return jsonify(message='Logged out.')
+        return render_template('auth/login.html')
 
     def protected(self):
         try:

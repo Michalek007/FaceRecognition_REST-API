@@ -1,5 +1,5 @@
 from cli.groups import GroupType, GroupCreator
-from utils import ServiceRequestsApi
+from app.modules.service_api import ServiceApi
 
 
 class Cli:
@@ -23,7 +23,7 @@ class Cli:
         """ Cli initialisation.
             Creates cli groups and adds them to app.
         """
-        api = ServiceRequestsApi()
+        api = ServiceApi()
         for group_type in self.groups:
             GroupCreator.create_group(app=self.app, api=api, database=self.db, group_type=group_type)
 

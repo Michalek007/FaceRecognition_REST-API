@@ -1,0 +1,1 @@
+from scheduler.tasks.face_recognition.task import FaceRecognitionTask

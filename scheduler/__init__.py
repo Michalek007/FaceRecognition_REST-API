@@ -8,13 +8,13 @@ from flask_apscheduler import APScheduler
 
 from app import app, db
 from scheduler.core import Scheduler
-from utils import ServiceRequestsApi
+from app.modules.service_api import ServiceApi
 
 
 def deploy_scheduler():
     """ Deploys scheduler. Should be called before running app. """
 
-    api = ServiceRequestsApi()
+    api = ServiceApi()
     scheduler = Scheduler(
         scheduler=APScheduler(),
         api=api,

@@ -44,18 +44,21 @@ class Scheduler:
 
         for job in self.scheduler_jobs:
             print(job)
-            task = TaskCreator.create_task(
-                scheduler=self.scheduler,
-                api=self.api,
-                database=self.db,
-                task_type=job.get('task_type')
-            )
-            self.scheduler.add_job(
-                func=task.main_task,
-                id=job.get('id'),
-                trigger='interval',
-                minutes=job.get('minutes')
-            )
+            self.add_job(job.get('task_type'), job.get('id'), job.get('minutes'))
 
-        for job in self.scheduler.get_jobs():
+        for job in self.get_jobs():
             print(job)
+
+    def add_job(self, task_type: TaskType, job_id, minutes, *args, **kwargs):
+        """ Adds scheduler job. """
+        task = TaskCreator.create_task(self.scheduler, self.api, self.db, task_type, *args, **kwargs)
+        self.scheduler.add_job(
+            func=task.main_task,
+            id=job_id,
+            trigger='interval',
+            minutes=minutes
+        )
+
+    def get_jobs(self):
+        """ Returns current schedulers job. """
+        return self.scheduler.get_jobs()

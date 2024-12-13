@@ -20,10 +20,26 @@
             console.error(error);
           });
       }
+      function logout() {
+        fetch("{{url_for('user.logout')}}")
+          .then(response => response.json())
+          .then(data => {
+              document.getElementById("status").innerText = data["message"];
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      }
       getData();
     </script>
 
     <h1> Microcontrollers API  </h1>
     <ul id="data-container"></ul>
+{#    <button class="button" onclick="logout()"> Logout </button>#}
+     <form action="{{url_for('user.logout')}}" id="logout" method="get">
+        <div class="white_text">
+            <input type="submit" class="button" id="btn-logout" value="Logout" />
+        </div>
+    </form>
 
 {% endblock %}

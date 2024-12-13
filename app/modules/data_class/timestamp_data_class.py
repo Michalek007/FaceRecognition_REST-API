@@ -14,10 +14,7 @@ class TimestampDataClass(DataClassBase):
         super().__init__(data_name, data_table_class, data_ma_schema, data_ma_many_schema,
                          get_data_from_request, create_data_obj, set_data_obj_values)
 
-        self.date_util = DateUtil(
-            date_format='%Y-%m-%d %H:%M:%S.%f',
-            optional_date_format=('%Y-%m-%d %H:%M:%S', '%Y-%m-%d')
-        )
+        self.date_util = DateUtil(['%Y-%m-%d %H:%M:%S.%f', '%Y-%m-%d %H:%M:%S', '%Y-%m-%d'])
 
     def get_method(self, obj_id: int = None):
         """ HTTP GET method implementation.

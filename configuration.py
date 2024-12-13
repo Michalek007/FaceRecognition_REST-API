@@ -4,6 +4,7 @@ from collections import namedtuple
 import json
 from pathlib import Path
 import socket
+import secret
 
 
 class Config:
@@ -17,8 +18,8 @@ class Config:
         'port': 5000,
     }
     MIN_ACTIVITY_TIME = 15
-    SECRET_KEY = '87673fa7f3a987323301f129'
-    TOKEN = '31024daadeb926bc08b0ca0e'
+    SECRET_KEY = secret.SECRET_KEY
+    TOKEN = secret.TOKEN
     COMPUTER_NAME = socket.gethostname()
     BASEDIR = os.path.abspath(os.path.dirname(__file__))
     DATABASE = os.path.join(BASEDIR, str(Path('database/data/database.db')))

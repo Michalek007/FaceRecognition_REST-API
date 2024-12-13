@@ -52,3 +52,6 @@ def deploy_app_views():
 
     from app.views import base
     print("App views deployed!")
+
+    from app.modules.service_api import ServiceApi
+    app.config['db_api'] = ServiceApi()

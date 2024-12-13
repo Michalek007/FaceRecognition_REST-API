@@ -4,4 +4,4 @@ __pycache__/
 /.venv/
 /.pytest_cache/
 /.idea/
-database/db/data.db
+secret.py

@@ -32,50 +32,77 @@ class MembersBp(BlueprintSingleton):
         return members_obj
 
     # views
-    def get(self, members_id: int = None):
-        return {}
+    def get(self, member_id: int = None):
+        if member_id is None:
+            user_id = request.args.get("user_id")
+            if user_id is None:
+                return jsonify(members_many_schema.dump(Members.query.all()))
+
+            members_list = Members.query.filter_by(user_id=user_id).all()
+            if not members_list:
+                return jsonify(message=f'There are no members with given user_id'), 404
+            return jsonify(members_many_schema.dump(members_list))
+
+        members_obj = Members.query.filter_by(id=member_id).first()
+        if members_obj:
+            return jsonify(members_schema.dump(members_obj))
+        else:
+            return jsonify(message=f'There is no member with given id'), 404
 
     def add(self):
         return {}
 
-    def delete(self, members_id: int = None):
+    def delete(self, member_id: int = None):
         return {}
 
-    def update(self, members_id: int = None):
+    def update(self, member_id: int = None):
         return {}
 
     def upload_image(self):
+        user_id = flask_login.current_user.id
+        image_id = f'temp_member_{user_id}'
         try:
-            filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), 'temp_member.jpg')
+            filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}.jpg')
             request.files.get('file').save(filename)
         except AttributeError:
             return jsonify(message=f'File not found in request body!'), 404
 
+        base_url = f'http://{current_app.config.get("LISTENER").get("host")}:{current_app.config.get("LISTENER").get("port")}/static/temp'
+        image_url = f'{base_url}/{image_id}.jpg'
+
         image = Image.open(filename)
         boxes, _ = self.mtcnn.detect(image)
+        if boxes is None:
+            return render_template("members/add.html", member_image=image_url, detected_face=False)
         draw = ImageDraw.Draw(image)
         for box in boxes:
-            draw.rectangle(box.tolist(), outline='red', width=3)
-        filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), 'temp_member_detected.jpg')
+            draw.rectangle(box.tolist(), outline='red', width=int(image.width*0.01))
+            break
+        filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}_detected.jpg')
         image.save(filename)
-        image_url = f'http://{current_app.config.get("LISTENER").get("host")}:{current_app.config.get("LISTENER").get("port")}/static/temp/temp_member_detected.jpg'
-        return render_template("members/add.html", member_image=image_url)
+        image_url = f'{base_url}/{image_id}_detected.jpg'
+        return render_template("members/add.html", member_image=image_url, detected_face=True)
 
     def new(self):
         name = request.form.get('name')
         if not name:
             return jsonify(message='New member name was not provided!'), 404
         user_id = flask_login.current_user.id
+        image_id = f'temp_member_{user_id}'
         # check if name not already exist for  user members
 
         filename = name.replace(' ', '')
         image = os.path.join(current_app.config.get('IMAGES_DIR'), filename+'.jpg')
-        temp_image = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), 'temp_member.jpg')
+        temp_image = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}.jpg')
         shutil.copy(temp_image, image)
         embedding_file = os.path.join(current_app.config.get('EMBEDDINGS_DIR'), filename+'.pt')
 
         img = Image.open(image)
-        aligned = self.mtcnn(img).unsqueeze(0)
+        aligned = self.mtcnn(img)
+        if aligned is None:
+            Path(temp_image).unlink(missing_ok=True)
+            return jsonify(message='No face on image was detected!'), 404
+        aligned = aligned[0].unsqueeze(0)
         embeddings = self.resnet(aligned).detach()[0]
         torch.save(embeddings, embedding_file)
 
@@ -86,7 +113,7 @@ class MembersBp(BlueprintSingleton):
         db.session.commit()
 
         Path(temp_image).unlink(missing_ok=True)
-        Path(current_app.config.get('TEMP_UPLOAD_DIR'), 'temp_member_detected.jpg').unlink(missing_ok=True)
+        Path(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}_detected.jpg').unlink(missing_ok=True)
 
         return jsonify(message='New member added!')
 
