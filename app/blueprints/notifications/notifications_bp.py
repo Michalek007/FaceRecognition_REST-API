@@ -2,8 +2,11 @@ from flask import request, url_for, redirect, render_template, jsonify, current_
 import flask_login
 from pyfcm import FCMNotification
 from configuration import Config
+from datetime import datetime, timedelta
+from collections import defaultdict
 
 from app.blueprints import BlueprintSingleton
+from database.schemas import Notifications
 
 
 class NotificationsBp(BlueprintSingleton):
@@ -13,6 +16,7 @@ class NotificationsBp(BlueprintSingleton):
         service_account_file="secret/facerecognitionapp-3fede-firebase-adminsdk-yd1f9-532abfb0dc.json",
         project_id=Config.FCM_PROJECT_ID
     )
+    notifications = defaultdict(list)
 
     def register_token(self):
         token = request.form.get('token')
@@ -38,10 +42,31 @@ class NotificationsBp(BlueprintSingleton):
         return jsonify(result), 200
 
     def set(self):
-        pass
+        name = request.args.get('name')
+        if not name:
+            return jsonify(message='Member name must be provided to send notification!'), 404
+        user_id = request.args.get('user_id')
+        if not user_id:
+            return jsonify(message='UserID must be provided to send notification!'), 404
+
+        timestamp = datetime.now()
+        self.notifications[user_id].append((name, timestamp))
+        notification_obj = Notifications(user_id=user_id, member_name=name, timestamp=timestamp)
+        db = current_app.config.get('db')
+        db.session.add(notification_obj)
+        db.session.commit()
+        return jsonify(message="Notification added successfully!")
 
     def get(self):
-        pass
+        user_id = flask_login.current_user.id
+        if not self.notifications[user_id]:
+            return jsonify(message="No available notifications!")
+        name, timestamp = self.notifications[user_id].pop(0)
+        if name == 'unknown':
+            message = f"Unknown person detected at {timestamp}!"
+        else:
+            message = f"Member {name} recognized at {timestamp}!"
+        return jsonify(message=message)
 
     # gui views
     def fcm_view(self):

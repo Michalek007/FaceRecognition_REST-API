@@ -10,7 +10,7 @@ class Notifications(db.Model):
     __tablename__ = 'notifications'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer)
-    member_name = Column(String, unique=True)
+    member_name = Column(String)
     timestamp = Column(String)
 
 

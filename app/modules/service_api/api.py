@@ -65,3 +65,6 @@ class ServiceApi:
             return self.get('/members/get/', params=dict(user_id=user_id))
         else:
             return self.get('/members/get/')
+
+    def notifications_set(self, name: str, user_id: str):
+        return self.post('/notifications/set/', params=dict(name=name, user_id=user_id))

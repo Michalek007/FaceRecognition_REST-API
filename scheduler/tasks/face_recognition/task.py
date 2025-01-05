@@ -21,19 +21,18 @@ class FaceRecognitionTask(TaskBase):
             print(job)
 
         response, error = self.api.members_get(user_id=self.user_id)
-        if error:
+        if error or not response:
             print(error)
-        if response:
-            members_list = response.json()
-            if self.embedding:
-                recognized_names = recognize.run_lite_face(self.filename, members_list)
-                print(recognized_names)
-                return
+            return
+        members_list = response.json()
+        if self.embedding:
+            recognized_names = recognize.run_lite_face(self.filename, members_list)
+        else:
             recognized_names = recognize.run_resnet(self.filename, members_list, self.aligned)
-            print(recognized_names)
-
-    def recognize(self):
-        pass
-
-    def notification(self, names: list):
-        pass
+        if not recognized_names:
+            return
+        if self.aligned or self.embedding:
+            response, error = self.api.notifications_set(recognized_names[0], self.user_id)
+        else:
+            for name in recognized_names:
+                response, error = self.api.notifications_set(recognized_names[0], self.user_id)

@@ -23,7 +23,7 @@ class TimestampDataClass(DataClassBase):
         """
         if obj_id is None:
             # # # getting objects based on timestamp
-            timestamp = request.args.get('Timestamp')
+            timestamp = request.args.get('timestamp')
             data_obj = self.data_table_class.query.all()
             if timestamp is None:
                 return jsonify(output=self.data_ma_many_schema.dump(data_obj))
@@ -51,7 +51,7 @@ class TimestampDataClass(DataClassBase):
         if obj_id is None:
 
             # # # getting and validating timestamp
-            timestamp = request.args.get('Timestamp')
+            timestamp = request.args.get('timestamp')
             if timestamp is None:
                 return jsonify(message='Missing value. Expected arg: Timestamp'), 400
 
