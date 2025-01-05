@@ -30,6 +30,7 @@ class Config:
     TEMP_UPLOAD_DIR = os.path.join(BASEDIR, str(Path('app/static/temp')))
     IMAGES_DIR = os.path.join(BASEDIR, str(Path('database/data/images')))
     EMBEDDINGS_DIR = os.path.join(BASEDIR, str(Path('database/data/embeddings')))
+    FCM_PROJECT_ID = secret.projectId
 
     for path in (TEMP_UPLOAD_DIR, IMAGES_DIR, EMBEDDINGS_DIR):
         path_obj = Path(path)

@@ -42,6 +42,7 @@ def deploy_app_views():
     from app.blueprints.details import details
     from app.blueprints.members import members
     from app.blueprints.face_recognition import face_recognition
+    from app.blueprints.notifications import notifications
 
     app.register_blueprint(auth)
     app.register_blueprint(user)
@@ -49,6 +50,7 @@ def deploy_app_views():
     app.register_blueprint(details)
     app.register_blueprint(members)
     app.register_blueprint(face_recognition)
+    app.register_blueprint(notifications)
 
     from app.views import base
     print("App views deployed!")

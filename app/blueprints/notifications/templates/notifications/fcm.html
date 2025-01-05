@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block head %}
+    {{ super() }}
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging.js"></script>
+{% endblock %}
+
+{% block body %}
+     <script>
+    import { initializeApp } from "firebase/app";
+    import { getMessaging } from "firebase/messaging";
+    const initializeApp = require("firebase/app");
+    const getMessaging = require("firebase/messaging");
+    const firebaseConfig = {
+      apiKey: "AIzaSyDW7GSI2dvFzxbVC6GiEr85U6Ged3eR1FQ",
+      authDomain: "facerecognitionapp-3fede.firebaseapp.com",
+      projectId: "facerecognitionapp-3fede",
+      storageBucket: "facerecognitionapp-3fede.firebasestorage.app",
+      messagingSenderId: "597024872693",
+      appId: "1:597024872693:web:7dcd002ed41e5644c34dbc",
+      measurementId: "G-TD62FXQK4B"
+    };
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+
+    // Initialize Firebase Cloud Messaging and get a reference to the service
+    const messaging = getMessaging(app);
+    messaging.requestPermission().then(() => {
+        console.log('Notification permission granted.');
+            return messaging.getToken({ vapidKey: 'BLkABVdyfZd5V2cwWPy-mnPeZgzCxqfTQ6zWBa39otQBdc7uPqQL1qQwGDtvwanxoQYUWoj6IqA1oTwCkHA2bz0' });
+        }).then((token) => {
+            console.log('Device token:', token);
+            // Send this token to your Flask backend
+        }).catch((err) => {
+            console.error('Unable to get permission to notify.', err);
+        });
+        messaging.onMessage((payload) => {
+            console.log('Message received. ', payload);
+            // Show notification or update UI
+    });
+    </script>
+
+    <h1> Notifications </h1>
+{#     <form action="{{url_for('members.upload_image')}}" id="imageFile" method="post" enctype="multipart/form-data">#}
+{#        <p class="white_text">Select image of person whom you want to add to your members group:</p>#}
+{#        <div class="white_text">#}
+{#            <input type="file" class="white_text" name="file" id="customFile" />#}
+{#        </div>#}
+{##}
+{#        <div class="white_text">#}
+{#            <input type="submit" class="button" id="btn-upload" value="Upload" />#}
+{#        </div>#}
+{#    </form>#}
+{% endblock %}

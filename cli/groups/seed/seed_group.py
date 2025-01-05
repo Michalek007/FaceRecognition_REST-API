@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from cli.groups import BaseGroup
 from lib_objects import bcrypt
 from database.schemas import User, Members
+import secret
 
 
 class SeedGroup(BaseGroup):
@@ -10,7 +11,7 @@ class SeedGroup(BaseGroup):
     bcrypt = bcrypt
 
     def init(self):
-        admin = User(username='admin', pw_hash=self.bcrypt.generate_password_hash('admin'))
+        admin = User(username='admin', pw_hash=self.bcrypt.generate_password_hash(secret.ADMIN_PASSWORD))
 
         self.db.session.add(admin)
         self.db.session.commit()
