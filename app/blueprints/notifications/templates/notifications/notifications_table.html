@@ -1,0 +1,27 @@
+{% extends "table_base.html" %}
+
+            {% block title %}
+                Notifications
+            {% endblock %}
+            {%  block table_heading %}
+                        <th onclick="sortTable(0)">TIMESTAMP</th>
+                        <th onclick="sortTable(1)">RECOGNIZED MEMBERS</th>
+            {% endblock %}
+
+            {% block url %}
+                '{{ url_for('members.get') }}'
+            {% endblock %}
+            {% block for_each %}
+                data.forEach(item => {
+                        const row = tableBody.insertRow();
+                        const cell1 = row.insertCell(0);
+                        const cell2 = row.insertCell(1);
+
+                        cell1.textContent = item.timestamp;
+                        cell2.textContent = item.members;
+                });
+            {% endblock %}
+
+{% block body %}
+    {{ super() }}
+{% endblock %}

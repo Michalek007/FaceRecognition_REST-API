@@ -15,7 +15,6 @@
                 '{{ url_for('members.get') }}'
             {% endblock %}
             {% block for_each %}
-                data = data.output
                 data.forEach(item => {
                         const row = tableBody.insertRow();
                         const cell1 = row.insertCell(0);

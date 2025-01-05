@@ -36,7 +36,7 @@ class UserBp(BlueprintSingleton):
             return jsonify(message='That username is already taken!'), 409
         else:
             pw_hash = current_app.config.get('bcrypt').generate_password_hash(password)
-            new_user = User(username=login, pw_hash=pw_hash)
+            new_user = User(username=login, pw_hash=pw_hash, device_id='')
             current_app.config.get('db').session.add(new_user)
             current_app.config.get('db').session.commit()
             return jsonify(message='User created successfully.'), 201
@@ -56,10 +56,10 @@ class UserBp(BlueprintSingleton):
     def users(self, user_id: int = None):
         if user_id is None:
             users_list = User.query.all()
-            return jsonify(users=users_schema.dump(users_list))
+            return jsonify(users_schema.dump(users_list))
         user = User.query.filter_by(id=user_id).first()
         if user:
-            return jsonify(user=user_schema.dump(user))
+            return jsonify(user_schema.dump(user))
         else:
             return jsonify(message='There is no user with that id'), 404
 

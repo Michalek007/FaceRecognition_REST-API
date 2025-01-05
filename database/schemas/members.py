@@ -4,7 +4,7 @@ from database import db
 
 
 class Members(db.Model):
-    """ Table for members data.
+    """ Table for members.
         Fields -> 'id', 'user_id', 'name', 'embedding', 'image'
     """
     __tablename__ = 'members'

@@ -20,3 +20,9 @@ def send():
 @flask_login.login_required
 def fcm():
     return NotificationsBp().fcm_view()
+
+
+@notifications_bp.route('/table/', methods=['GET'])
+@flask_login.login_required
+def table():
+    return NotificationsBp().table()

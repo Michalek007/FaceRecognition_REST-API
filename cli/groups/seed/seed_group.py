@@ -11,16 +11,16 @@ class SeedGroup(BaseGroup):
     bcrypt = bcrypt
 
     def init(self):
-        admin = User(username='admin', pw_hash=self.bcrypt.generate_password_hash(secret.ADMIN_PASSWORD))
+        admin = User(username='admin', pw_hash=self.bcrypt.generate_password_hash(secret.ADMIN_PASSWORD), device_id='testing')
 
         self.db.session.add(admin)
         self.db.session.commit()
         print('Database seeded with init data!')
 
     def users(self):
-        user1 = User(username='test1', pw_hash=self.bcrypt.generate_password_hash('test'))
-        user2 = User(username='test2', pw_hash=self.bcrypt.generate_password_hash('test'))
-        user3 = User(username='test3', pw_hash=self.bcrypt.generate_password_hash('test'))
+        user1 = User(username='test1', pw_hash=self.bcrypt.generate_password_hash('test'), device_id='device1')
+        user2 = User(username='test2', pw_hash=self.bcrypt.generate_password_hash('test'), device_id='device2')
+        user3 = User(username='test3', pw_hash=self.bcrypt.generate_password_hash('test'), device_id='device3')
 
         self.db.session.add(user1)
         self.db.session.add(user2)

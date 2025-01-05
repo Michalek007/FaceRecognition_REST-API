@@ -9,7 +9,7 @@ from pathlib import Path
 
 from app.blueprints import BlueprintSingleton
 from database.schemas import members_schema, members_many_schema, Members
-from app.modules.face_recognition import mtcnn, resnet
+from app.modules.face_recognition import mtcnn, resnet, lite_face
 
 
 class MembersBp(BlueprintSingleton):
@@ -17,9 +17,11 @@ class MembersBp(BlueprintSingleton):
         Attributes:
             mtcnn: MTCNN model
             resnet: InceptionResnetV1 model
+            lite_face: LiteFace model
     """
     mtcnn = mtcnn
     resnet = resnet
+    lite_face = lite_face
 
     @staticmethod
     def create_members_obj(data):
@@ -72,11 +74,15 @@ class MembersBp(BlueprintSingleton):
 
         image = Image.open(filename)
         boxes, _ = self.mtcnn.detect(image)
+        boxes_lite = self.lite_face.lite_mtcnn.detect(image)
         if boxes is None:
             return render_template("members/add.html", member_image=image_url, detected_face=False)
         draw = ImageDraw.Draw(image)
         for box in boxes:
             draw.rectangle(box.tolist(), outline='red', width=int(image.width*0.01))
+            break
+        for x, y, x2, y2, _ in boxes_lite:
+            draw.rectangle((x.item(), y.item(), x2.item(), y2.item()), outline='blue', width=int(image.width*0.01))
             break
         filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}_detected.jpg')
         image.save(filename)
@@ -89,32 +95,57 @@ class MembersBp(BlueprintSingleton):
             return jsonify(message='New member name was not provided!'), 404
         user_id = flask_login.current_user.id
         image_id = f'temp_member_{user_id}'
-        # check if name not already exist for  user members
+        exists = False
+        if Members.query.filter_by(name=name).first():
+            exists = True
 
         filename = name.replace(' ', '')
-        image = os.path.join(current_app.config.get('IMAGES_DIR'), filename+'.jpg')
+        images_dir = os.path.join(current_app.config.get('IMAGES_DIR'), filename)
+        embeddings_dir = os.path.join(current_app.config.get('EMBEDDINGS_DIR'), filename)
+        Path(images_dir).mkdir(exist_ok=True)
+        Path(embeddings_dir).mkdir(exist_ok=True)
+        files_count = 0
+        for _, _, files in os.walk(images_dir):
+            files_count = len(files)
+
+        if files_count == 0:
+            image = os.path.join(current_app.config.get('IMAGES_DIR'), filename+'.jpg')
+            temp_image = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}.jpg')
+            shutil.copy(temp_image, image)
+            embedding_file = os.path.join(current_app.config.get('EMBEDDINGS_DIR'), filename+'.pt')
+            img = Image.open(image)
+            aligned = self.mtcnn(img)
+            if aligned is None:
+                Path(temp_image).unlink(missing_ok=True)
+                return jsonify(message='No face on image was detected!'), 404
+            aligned = aligned[0].unsqueeze(0)
+            embeddings = self.resnet(aligned).detach()[0]
+            torch.save(embeddings, embedding_file)
+
+        files_count += 1
+        image = os.path.join(images_dir, f'{filename}{files_count}.jpg')
         temp_image = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}.jpg')
         shutil.copy(temp_image, image)
-        embedding_file = os.path.join(current_app.config.get('EMBEDDINGS_DIR'), filename+'.pt')
-
+        embedding_file = os.path.join(embeddings_dir, f'{filename}{files_count}.pt')
         img = Image.open(image)
-        aligned = self.mtcnn(img)
-        if aligned is None:
+        aligned = self.lite_face.lite_mtcnn(img)
+        if not aligned:
             Path(temp_image).unlink(missing_ok=True)
             return jsonify(message='No face on image was detected!'), 404
-        aligned = aligned[0].unsqueeze(0)
-        embeddings = self.resnet(aligned).detach()[0]
-        torch.save(embeddings, embedding_file)
+        torch.save(self.lite_face.get_embedding(aligned[0]), embedding_file)
 
-        # response = requests.post(url_for('members.add'))
-        db = current_app.config.get('db')
-        members_obj = self.create_members_obj((user_id, name, embedding_file, image))
-        db.session.add(members_obj)
-        db.session.commit()
+        if not exists:
+            # response = requests.post(url_for('members.add'))
+            db = current_app.config.get('db')
+            members_obj = self.create_members_obj((user_id, name, embeddings_dir, images_dir))
+            db.session.add(members_obj)
+            db.session.commit()
 
         Path(temp_image).unlink(missing_ok=True)
         Path(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}_detected.jpg').unlink(missing_ok=True)
 
+        if exists:
+            return jsonify(message=f'Added new photo for member {name}!')
         return jsonify(message='New member added!')
 
     # gui views

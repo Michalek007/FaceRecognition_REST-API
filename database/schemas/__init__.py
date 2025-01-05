@@ -3,3 +3,4 @@
 """
 from database.schemas.user import user_schema, users_schema, User
 from database.schemas.members import members_schema, members_many_schema, Members
+from database.schemas.notifications import notifications_schema, notifications_many_schema, Notifications

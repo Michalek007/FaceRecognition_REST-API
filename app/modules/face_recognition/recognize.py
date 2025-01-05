@@ -4,6 +4,7 @@ from torchvision.transforms import functional as F
 from torch.nn.functional import interpolate
 import numpy as np
 from typing import List
+import os
 
 from .mtcnn import mtcnn
 from .resnet import resnet
@@ -33,7 +34,7 @@ class Recognize:
             members_embeddings = []
             members_names = []
             for member in members_list:
-                members_embeddings.append(torch.load(member['embedding']))
+                members_embeddings.append(torch.load(member['embedding']+'.pt'))
                 members_names.append(member['name'])
 
             for embedding in embeddings:
@@ -50,8 +51,20 @@ class Recognize:
 
         return recognized_members
 
-    def run_lite_face(self, embedding: List[float], members_list: list):
-        pass
+    def run_lite_face(self, filename: str, members_list: list):
+        embedding = torch.load(filename)
+        for member in members_list:
+            member_embeddings = []
+            for _, _, files in os.walk(member['embedding']):
+                for file in files:
+                    member_embeddings.append(torch.load(os.path.join(member['embedding'], file)))
+                break
+            self.lite_face.add_known_embedding(member_embeddings, member['name'])
+
+        recognized_names = self.lite_face.recognize_embeddings([[embedding]])
+        self.lite_face.reset_known_embeddings()
+        recognized_members = [name for name in recognized_names[0] if name != 'unknown']
+        return recognized_members
 
 
 recognize = Recognize()

@@ -6,7 +6,6 @@ from configuration import Config
 from app.blueprints import BlueprintSingleton
 
 
-
 class NotificationsBp(BlueprintSingleton):
     """ Implementation of notifications system. """
     client_tokens = []  # Ideally, use a database.
@@ -38,6 +37,15 @@ class NotificationsBp(BlueprintSingleton):
         )
         return jsonify(result), 200
 
+    def set(self):
+        pass
+
+    def get(self):
+        pass
+
     # gui views
     def fcm_view(self):
         return render_template('notifications/fcm.html')
+
+    def table(self):
+        return render_template('notifications/notifications_table.html')

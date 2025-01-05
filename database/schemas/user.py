@@ -5,17 +5,18 @@ from lib_objects import ma
 
 class User(db.Model):
     """ Table for service users.
-        Fields -> 'id', 'username', 'pw_hash'
+        Fields -> 'id', 'device_id', 'username', 'pw_hash'
     """
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
+    device_id = Column(Integer, unique=True)
     username = Column(String, unique=True)
     pw_hash = Column(String)
 
 
 class UserSchema(ma.Schema):
     class Meta:
-        fields = ('id', 'username', 'pw_hash')
+        fields = ('id', 'device_id', 'username', 'pw_hash')
 
 
 user_schema = UserSchema()

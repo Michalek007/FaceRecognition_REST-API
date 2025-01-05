@@ -1,9 +1,11 @@
 from flask import request, url_for, redirect, render_template, jsonify, current_app
 import os
 import struct
+import torch
 
 from app.blueprints import BlueprintSingleton
 from scheduler.tasks import TaskType
+from database.schemas import User
 from app.modules.face_recognition import recognize
 from app.modules.image_utils import RGB565
 
@@ -11,26 +13,32 @@ from app.modules.image_utils import RGB565
 class FaceRecognitionBp(BlueprintSingleton):
     """ Face recognition implementation. """
     MAX_IMAGES_COUNT = 5
+    MAX_EMBEDDINGS_COUNT = 5
 
     def __new__(cls):
         if not isinstance(cls._instance, cls):
             cls._instance = object.__new__(cls)
             cls._instance.img_count = 0
             cls._instance.test_img_count = 0
+            cls._instance.embeddings_count = 0
         return cls._instance
 
     # views
     def recognize(self):
-        user_id = request.form.get('user_id')
-        in_place = request.form.get('in_place')
+        device_id = request.form.get('device_id')
 
         aligned = request.args.get('aligned')
         width = request.args.get('width')
         height = request.args.get('height')
         embedding = request.args.get('embedding')
+        in_place = request.args.get('in_place')
 
-        if not user_id:
-            user_id = 'admin'
+        if not device_id:
+            device_id = 'testing'
+        user = User.query.filter_by(device_id=device_id).first()
+        if not user:
+            return jsonify(message="Unauthorised device id. "), 404
+        user_id = user.username
 
         print(request.content_type)
         print(request.content_length)
@@ -42,15 +50,28 @@ class FaceRecognitionBp(BlueprintSingleton):
             if request.content_length % 4 != 0:
                 return jsonify(message="Length of embedding must be a multiple of 4")
 
-            face_embedding = []
-            for i in range(0, len(request.data), 4):
-                byte_chunk = request.data[i:i + 4]
-                float_value = struct.unpack('!f', bytes(byte_chunk))[0]
-                face_embedding.append(float_value)
-
+            face_embedding = struct.unpack(f'{request.content_length//4}f', request.data)
             print(face_embedding)
+            embedding_id = f'{user_id}_{self.embeddings_count}_emb'
+            filename = os.path.join('temp', f'{embedding_id}.pt')
+            face_embedding = torch.tensor(face_embedding, dtype=torch.float)
+            torch.save(face_embedding, filename)
+
             if in_place:
-                return {}
+                response, error = current_app.config.get('db_api').members_get(user_id=user_id)
+                if error:
+                    return jsonify(message=error)
+                members_list = response.json()
+                return jsonify(recognized=recognize.run_lite_face(filename, members_list))
+
+            self.embeddings_count += 1
+            if self.embeddings_count >= self.MAX_EMBEDDINGS_COUNT:
+                self.embeddings_count = 0
+
+            scheduler = current_app.config.get('scheduler')
+            if len(scheduler.get_jobs()) >= self.MAX_IMAGES_COUNT:
+                return jsonify(message='Facial recognition workers limit has been reached!'), 404
+            scheduler.add_job(TaskType.face_recognition, embedding_id, 0.01, filename=filename, user_id=user_id, scheduler_job_id=embedding_id, aligned=aligned, embedding=embedding)
             return jsonify(message='Embedding uploaded successfully!')
 
         if request.content_type == 'application/octet-stream' and not aligned:
@@ -96,8 +117,7 @@ class FaceRecognitionBp(BlueprintSingleton):
             return jsonify(recognized=recognize.run_resnet(filename, members_list, aligned))
 
         scheduler = current_app.config.get('scheduler')
-        print(len(scheduler.get_jobs()))
         if len(scheduler.get_jobs()) >= self.MAX_IMAGES_COUNT:
             return jsonify(message='Images limit has been reached!'), 404
-        scheduler.add_job(TaskType.face_recognition, image_id, 0.01, filename=filename, user_id=user_id, image_id=image_id, aligned=aligned)
+        scheduler.add_job(TaskType.face_recognition, image_id, 0.01, filename=filename, user_id=user_id, scheduler_job_id=image_id, aligned=aligned, embedding=embedding)
         return jsonify(message='Image uploaded successfully!')
