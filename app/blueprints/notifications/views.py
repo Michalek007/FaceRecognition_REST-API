@@ -16,6 +16,12 @@ def send():
     return NotificationsBp().send()
 
 
+@notifications_bp.route('/get_all/', methods=['GET'])
+@flask_login.login_required
+def get_all():
+    return NotificationsBp().get_all()
+
+
 @notifications_bp.route('/set/', methods=['POST'])
 @flask_login.login_required
 def set():

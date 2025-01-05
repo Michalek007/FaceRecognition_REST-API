@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 
 from app.blueprints import BlueprintSingleton
-from database.schemas import Notifications
+from database.schemas import Notifications, notifications_many_schema, notifications_schema
 
 
 class NotificationsBp(BlueprintSingleton):
@@ -67,6 +67,9 @@ class NotificationsBp(BlueprintSingleton):
         else:
             message = f"Member {name} recognized at {timestamp}!"
         return jsonify(message=message)
+
+    def get_all(self):
+        return jsonify(notifications_many_schema.dump(Notifications.query.all()))
 
     # gui views
     def fcm_view(self):

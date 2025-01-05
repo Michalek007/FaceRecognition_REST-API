@@ -9,7 +9,7 @@
             {% endblock %}
 
             {% block url %}
-                '{{ url_for('members.get') }}'
+                '{{ url_for('notifications.get_all') }}'
             {% endblock %}
             {% block for_each %}
                 data.forEach(item => {
@@ -18,7 +18,7 @@
                         const cell2 = row.insertCell(1);
 
                         cell1.textContent = item.timestamp;
-                        cell2.textContent = item.members;
+                        cell2.textContent = item.member_name;
                 });
             {% endblock %}
 
@@ -40,9 +40,13 @@
             console.error(error);
           });
       }
-       setInterval(function() {
+
+      setInterval(function() {
         getNotification();
       }, 500);
+      setInterval(function() {
+        location.reload();
+      }, 5000);
 
     </script>
 {% endblock %}
