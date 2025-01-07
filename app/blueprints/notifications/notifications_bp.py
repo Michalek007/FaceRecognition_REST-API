@@ -12,10 +12,11 @@ from database.schemas import Notifications, notifications_many_schema, notificat
 class NotificationsBp(BlueprintSingleton):
     """ Implementation of notifications system. """
     client_tokens = []  # Ideally, use a database.
-    fcm = FCMNotification(
-        service_account_file="secret/facerecognitionapp-3fede-firebase-adminsdk-yd1f9-532abfb0dc.json",
-        project_id=Config.FCM_PROJECT_ID
-    )
+    # fcm = FCMNotification(
+    #     service_account_file="secret/facerecognitionapp-3fede-firebase-adminsdk-yd1f9-532abfb0dc.json",
+    #     project_id=Config.FCM_PROJECT_ID
+    # )
+    fcm = None
     notifications = defaultdict(list)
 
     def register_token(self):
@@ -30,14 +31,12 @@ class NotificationsBp(BlueprintSingleton):
         # client_id = request.form.get('body')
         # fcm_token = "<fcm token>"
         fcm_token = self.client_tokens[0]
-        notification_title = "Uber update"
-        notification_body = "Hi John, your order is on the way!"
-        # notification_image = "https://example.com/image.png"
+        notification_title = "System notification"
+        notification_body = "Member name was recognized!"
         result = self.fcm.notify(
             fcm_token=fcm_token,
             notification_title=notification_title,
             notification_body=notification_body,
-            # notification_image=notification_image
         )
         return jsonify(result), 200
 

@@ -18,25 +18,30 @@ class UserBp(BlueprintSingleton):
             if test_id is not None:
                 return redirect(url_for('auth.logged_in'))
             login = request.args.get('login')
+            device_id = request.args.get('device_id')
             password = request.args.get('password')
             if not login:
                 return render_template('user/register.html')
         else:
             login = request.form.get('login')
+            device_id = request.form.get('device_id')
             password = request.form.get('password')
             repeat_password = request.form.get('repeat_password')
             if password != repeat_password:
                 return jsonify(message='Passwords are not the same!'), 408
             if login is None or password is None:
                 return jsonify(
-                    message='No value. Expected values for keys: \'login\', \'password\', \'repeat_password\''), 400
+                    message='No value. Expected values for keys: \'login\', \'device_id\', \'password\', \'repeat_password\''), 400
 
         test_user = User.query.filter_by(username=login).first()
+        test_device_id = User.query.filter_by(device_id=device_id).first()
         if test_user:
             return jsonify(message='That username is already taken!'), 409
+        elif test_device_id:
+            return jsonify(message='Given device id is already registered!'), 409
         else:
             pw_hash = current_app.config.get('bcrypt').generate_password_hash(password)
-            new_user = User(username=login, pw_hash=pw_hash, device_id='')
+            new_user = User(username=login, pw_hash=pw_hash, device_id=device_id)
             current_app.config.get('db').session.add(new_user)
             current_app.config.get('db').session.commit()
             return jsonify(message='User created successfully.'), 201

@@ -65,7 +65,9 @@ class Recognize:
 
         recognized_names = self.lite_face.recognize_embeddings([[embedding]])
         self.lite_face.reset_known_embeddings()
-        return recognized_names[0]
+        print(recognized_names)
+        recognized_names = set(recognized_names[0])
+        return recognized_names
 
 
 recognize = Recognize()

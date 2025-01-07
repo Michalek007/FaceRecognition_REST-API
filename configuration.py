@@ -32,7 +32,7 @@ class Config:
     EMBEDDINGS_DIR = os.path.join(BASEDIR, str(Path('database/data/embeddings')))
     FCM_PROJECT_ID = secret.projectId
 
-    for path in (TEMP_UPLOAD_DIR, IMAGES_DIR, EMBEDDINGS_DIR):
+    for path in (TEMP_UPLOAD_DIR, IMAGES_DIR, EMBEDDINGS_DIR, 'temp'):
         path_obj = Path(path)
         path_obj.mkdir(parents=True, exist_ok=True)
 

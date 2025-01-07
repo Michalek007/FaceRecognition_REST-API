@@ -1,11 +1,10 @@
-# Microcontrollers API
+# Face recognition service
 
-Rest-api containing functionalities with purpose of usage with microcontrollers and IoT devices.
+Service implementing face recognition for home automation system.
 
 It contains:
 * user authentication with flask-login
 * database created using SQLAlchemy
-* CRUD for computer performance (params)
 * periodic tasks with APScheduler
 * tests for api methods with pytest
 

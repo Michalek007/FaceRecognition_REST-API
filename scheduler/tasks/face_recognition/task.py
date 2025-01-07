@@ -31,8 +31,7 @@ class FaceRecognitionTask(TaskBase):
             recognized_names = recognize.run_resnet(self.filename, members_list, self.aligned)
         if not recognized_names:
             return
-        if self.aligned or self.embedding:
-            response, error = self.api.notifications_set(recognized_names[0], self.user_id)
-        else:
-            for name in recognized_names:
-                response, error = self.api.notifications_set(recognized_names[0], self.user_id)
+        # if self.aligned or self.embedding:
+        #     response, error = self.api.notifications_set(recognized_names[0], self.user_id)
+        for name in recognized_names:
+            response, error = self.api.notifications_set(name, self.user_id)

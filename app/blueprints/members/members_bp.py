@@ -74,16 +74,16 @@ class MembersBp(BlueprintSingleton):
 
         image = Image.open(filename)
         boxes, _ = self.mtcnn.detect(image)
-        boxes_lite = self.lite_face.lite_mtcnn.detect(image)
+        # boxes_lite = self.lite_face.lite_mtcnn.detect(image)
         if boxes is None:
             return render_template("members/add.html", member_image=image_url, detected_face=False)
         draw = ImageDraw.Draw(image)
         for box in boxes:
             draw.rectangle(box.tolist(), outline='red', width=int(image.width*0.01))
             break
-        for x, y, x2, y2, _ in boxes_lite:
-            draw.rectangle((x.item(), y.item(), x2.item(), y2.item()), outline='blue', width=int(image.width*0.01))
-            break
+        # for x, y, x2, y2, _ in boxes_lite:
+        #     draw.rectangle((x.item(), y.item(), x2.item(), y2.item()), outline='blue', width=int(image.width*0.01))
+        #     break
         filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}_detected.jpg')
         image.save(filename)
         image_url = f'{base_url}/{image_id}_detected.jpg'

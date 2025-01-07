@@ -22,6 +22,8 @@ app.config.from_object(ProductionConfig())
 
 db.init_app(app)
 app.config['db'] = db
+with app.app_context():
+    db.create_all()
 
 ma.init_app(app)
 app.config['ma'] = ma

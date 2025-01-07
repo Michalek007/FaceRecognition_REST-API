@@ -9,12 +9,14 @@ flask = "*"
 flask-login = "*"
 flask-sqlalchemy = "*"
 flask-marshmallow = "*"
-psutil = "*"
 flask-apscheduler = "*"
+flask-bcrypt = "*"
+psutil = "*"
 gevent = "*"
 pipenv = "*"
-flask-bcrypt = "*"
 requests = "*"
+facenet-pytorch = "*"
+pyfcm = "*"
 
 [dev-packages]
 
