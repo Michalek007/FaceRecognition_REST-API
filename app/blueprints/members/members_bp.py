@@ -54,8 +54,25 @@ class MembersBp(BlueprintSingleton):
     def add(self):
         return {}
 
-    def delete(self, member_id: int = None):
-        return {}
+    def delete(self):
+        user_id = flask_login.current_user.id
+        name = request.args.get('name')
+        if not name:
+            return jsonify(message=f'Member name was not provided.'), 404
+        members_obj = Members.query.filter_by(user_id=user_id, name=name).first()
+        if not members_obj:
+            return jsonify(message=f'There is no member with given name.'), 404
+        try:
+            Path(members_obj.embedding+'.pt').unlink(missing_ok=True)
+            Path(members_obj.image+'.jpg').unlink(missing_ok=True)
+            shutil.rmtree(members_obj.embedding, ignore_errors=False)
+            shutil.rmtree(members_obj.image, ignore_errors=False)
+        except PermissionError:
+            return jsonify(message=f'Member cannot be deleted when system is working.')
+        db = current_app.config.get('db')
+        db.session.delete(members_obj)
+        db.session.commit()
+        return jsonify(message=f'Member {name} deleted successfully.')
 
     def update(self, member_id: int = None):
         return {}
@@ -100,19 +117,20 @@ class MembersBp(BlueprintSingleton):
             exists = True
 
         filename = name.replace(' ', '')
-        images_dir = os.path.join(current_app.config.get('IMAGES_DIR'), filename)
-        embeddings_dir = os.path.join(current_app.config.get('EMBEDDINGS_DIR'), filename)
-        Path(images_dir).mkdir(exist_ok=True)
-        Path(embeddings_dir).mkdir(exist_ok=True)
+        file_dir = f'{user_id}\\{filename}'
+        images_dir = os.path.join(current_app.config.get('IMAGES_DIR'), file_dir)
+        embeddings_dir = os.path.join(current_app.config.get('EMBEDDINGS_DIR'), file_dir)
+        Path(images_dir).mkdir(exist_ok=True, parents=True)
+        Path(embeddings_dir).mkdir(exist_ok=True, parents=True)
         files_count = 0
         for _, _, files in os.walk(images_dir):
             files_count = len(files)
 
         if files_count == 0:
-            image = os.path.join(current_app.config.get('IMAGES_DIR'), filename+'.jpg')
+            image = os.path.join(current_app.config.get('IMAGES_DIR'), f'{file_dir}.jpg')
             temp_image = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}.jpg')
             shutil.copy(temp_image, image)
-            embedding_file = os.path.join(current_app.config.get('EMBEDDINGS_DIR'), filename+'.pt')
+            embedding_file = os.path.join(current_app.config.get('EMBEDDINGS_DIR'), f'{file_dir}.pt')
             img = Image.open(image)
             aligned = self.mtcnn(img)
             if aligned is None:

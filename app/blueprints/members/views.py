@@ -17,11 +17,10 @@ def add():
     return MembersBp().add()
 
 
-@members_bp.route('/delete/', methods=['DELETE'])
-@members_bp.route('/delete/<int:member_id>/', methods=['DELETE'])
+@members_bp.route('/delete/', methods=['GET'])
 @flask_login.login_required
-def delete(member_id: int = None):
-    return MembersBp().delete(member_id=member_id)
+def delete():
+    return MembersBp().delete()
 
 
 @members_bp.route('/update/<int:member_id>/', methods=['PUT'])

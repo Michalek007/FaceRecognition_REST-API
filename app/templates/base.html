@@ -16,6 +16,7 @@
         <a href="{{url_for('auth.login')}}"> LOGIN </a>
         <a href="{{url_for('members.upload')}}"> ADD MEMBER </a>
         <a href="{{url_for('notifications.table')}}"> NOTIFICATIONS </a>
+        <a href="{{url_for('members.table')}}"> MEMBERS </a>
 
     {% if current_user.id == "admin" %}
         <a href="{{url_for('details.info')}}"> DETAILS </a>
@@ -27,6 +28,7 @@
             <div class="dropdown-content">
                 <a href="{{url_for('user.users_table')}}">USERS</a>
                 <a href="{{url_for('members.table')}}">MEMBERS</a>
+                <a href="{{url_for('notifications.table')}}">NOTIFICATIONS</a>
             </div>
         </div>
     {% else %}

@@ -48,8 +48,8 @@ class Recognize:
 
         if not recognized_members:
             print("No members were recognized in the image!")
-        if aligned:
-            recognized_members.append("unknown")
+            if aligned:
+                recognized_members.append("unknown")
 
         return recognized_members
 
@@ -67,6 +67,9 @@ class Recognize:
         self.lite_face.reset_known_embeddings()
         print(recognized_names)
         recognized_names = set(recognized_names[0])
+        if len(recognized_names) > 2:
+            if "unknown" in recognized_names:
+                recognized_names.remove("unknown")
         return recognized_names
 
 

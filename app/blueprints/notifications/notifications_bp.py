@@ -11,7 +11,7 @@ from database.schemas import Notifications, notifications_many_schema, notificat
 
 class NotificationsBp(BlueprintSingleton):
     """ Implementation of notifications system. """
-    client_tokens = []  # Ideally, use a database.
+    client_tokens = []
     # fcm = FCMNotification(
     #     service_account_file="secret/facerecognitionapp-3fede-firebase-adminsdk-yd1f9-532abfb0dc.json",
     #     project_id=Config.FCM_PROJECT_ID
@@ -68,7 +68,8 @@ class NotificationsBp(BlueprintSingleton):
         return jsonify(message=message)
 
     def get_all(self):
-        return jsonify(notifications_many_schema.dump(Notifications.query.all()))
+        user_id = flask_login.current_user.id
+        return jsonify(notifications_many_schema.dump(Notifications.query.filter_by(user_id=user_id).all()))
 
     # gui views
     def fcm_view(self):

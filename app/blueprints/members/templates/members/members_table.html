@@ -12,7 +12,11 @@
             {% endblock %}
 
             {% block url %}
-                '{{ url_for('members.get') }}'
+                {% if current_user.id == "admin" %}
+                    '{{ url_for('members.get') }}'
+                {% else %}
+                    '{{ url_for('members.get', user_id=current_user.id) }}'
+                {% endif %}
             {% endblock %}
             {% block for_each %}
                 data.forEach(item => {
