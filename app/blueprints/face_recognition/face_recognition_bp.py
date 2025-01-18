@@ -14,6 +14,7 @@ class FaceRecognitionBp(BlueprintSingleton):
     """ Face recognition implementation. """
     MAX_IMAGES_COUNT = 5
     MAX_EMBEDDINGS_COUNT = 5
+    EMBEDDING_LEN = 128
 
     def __new__(cls):
         if not isinstance(cls._instance, cls):
@@ -25,16 +26,13 @@ class FaceRecognitionBp(BlueprintSingleton):
 
     # views
     def recognize(self):
-        device_id = request.form.get('device_id')
-
+        device_id = request.args.get('device_id')
         aligned = request.args.get('aligned')
         width = request.args.get('width')
         height = request.args.get('height')
         embedding = request.args.get('embedding')
         in_place = request.args.get('in_place')
 
-        if not device_id:
-            device_id = 'testing'
         user = User.query.filter_by(device_id=device_id).first()
         if not user:
             return jsonify(message="Unauthorised device id. "), 404
@@ -47,10 +45,13 @@ class FaceRecognitionBp(BlueprintSingleton):
         print(height)
 
         if embedding:
-            if request.content_length % 4 != 0:
-                return jsonify(message="Length of embedding must be a multiple of 4")
+            if request.content_length != self.EMBEDDING_LEN * 4:
+                return jsonify(message="Length of face embedding must be 128!")
 
-            face_embedding = struct.unpack(f'{request.content_length//4}f', request.data)
+            face_embedding = []
+            for i in range(request.content_length//4):
+                face_embedding.append(struct.unpack('>f', request.data[4*i:4*i+4])[0])
+
             print(face_embedding)
             embedding_id = f'{user_id}_{self.embeddings_count}_emb'
             filename = os.path.join('temp', f'{embedding_id}.pt')

@@ -71,6 +71,17 @@ class NotificationsBp(BlueprintSingleton):
         user_id = flask_login.current_user.id
         return jsonify(notifications_many_schema.dump(Notifications.query.filter_by(user_id=user_id).all()))
 
+    def delete_all(self):
+        user_id = flask_login.current_user.id
+        notifications = Notifications.query.filter_by(user_id=user_id).all()
+        count = len(notifications)
+        db = current_app.config.get('db')
+        for notification in notifications:
+            db.session.delete(notification)
+            db.session.commit()
+        notifications[user_id] = []
+        return jsonify(message=f"Notifications ({count}) deleted successfully. ")
+
     # gui views
     def fcm_view(self):
         return render_template('notifications/fcm.html')

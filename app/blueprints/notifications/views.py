@@ -22,6 +22,12 @@ def get_all():
     return NotificationsBp().get_all()
 
 
+@notifications_bp.route('/delete_all/', methods=['GET'])
+@flask_login.login_required
+def delete_all():
+    return NotificationsBp().delete_all()
+
+
 @notifications_bp.route('/set/', methods=['POST'])
 @flask_login.login_required
 def set():

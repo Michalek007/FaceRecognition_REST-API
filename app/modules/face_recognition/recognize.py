@@ -63,11 +63,12 @@ class Recognize:
                 break
             self.lite_face.add_known_embedding(member_embeddings, member['name'])
 
+        print(self.lite_face.names)
         recognized_names = self.lite_face.recognize_embeddings([[embedding]])
         self.lite_face.reset_known_embeddings()
         print(recognized_names)
         recognized_names = set(recognized_names[0])
-        if len(recognized_names) > 2:
+        if len(recognized_names) > 1:
             if "unknown" in recognized_names:
                 recognized_names.remove("unknown")
         return recognized_names
