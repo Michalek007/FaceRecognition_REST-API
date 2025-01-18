@@ -54,6 +54,7 @@ class Recognize:
         return recognized_members
 
     def run_lite_face(self, filename: str, members_list: list):
+        lite_face_obj = self.lite_face.create_copy()
         embedding = torch.load(filename)
         for member in members_list:
             member_embeddings = []
@@ -61,11 +62,10 @@ class Recognize:
                 for file in files:
                     member_embeddings.append(torch.load(os.path.join(member['embedding'], file)))
                 break
-            self.lite_face.add_known_embedding(member_embeddings, member['name'])
+            lite_face_obj.add_known_embedding(member_embeddings, member['name'])
 
-        print(self.lite_face.names)
-        recognized_names = self.lite_face.recognize_embeddings([[embedding]])
-        self.lite_face.reset_known_embeddings()
+        print(lite_face_obj.names)
+        recognized_names = lite_face_obj.recognize_embeddings([[embedding]])
         print(recognized_names)
         recognized_names = set(recognized_names[0])
         if len(recognized_names) > 1:

@@ -14,12 +14,7 @@ class FaceRecognitionTask(TaskBase):
         self.embedding = embedding
 
     def main_task(self):
-        for job in self.scheduler.get_jobs():
-            print(job)
         self.scheduler.remove_job(id=self.scheduler_job_id)
-        for job in self.scheduler.get_jobs():
-            print(job)
-
         response, error = self.api.members_get(user_id=self.user_id)
         if error or not response:
             print(error)
@@ -31,7 +26,5 @@ class FaceRecognitionTask(TaskBase):
             recognized_names = recognize.run_resnet(self.filename, members_list, self.aligned)
         if not recognized_names:
             return
-        # if self.aligned or self.embedding:
-        #     response, error = self.api.notifications_set(recognized_names[0], self.user_id)
         for name in recognized_names:
             response, error = self.api.notifications_set(name, self.user_id)

@@ -79,7 +79,7 @@ class NotificationsBp(BlueprintSingleton):
         for notification in notifications:
             db.session.delete(notification)
             db.session.commit()
-        notifications[user_id] = []
+        self.notifications[user_id] = []
         return jsonify(message=f"Notifications ({count}) deleted successfully. ")
 
     # gui views

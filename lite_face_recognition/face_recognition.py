@@ -11,10 +11,18 @@ from lite_face_recognition.lite_mtcnn import LiteMTCNN
 
 
 class FaceRecognition:
-    def __init__(self, model_pt_file: str):
-        self.model = LiteFace100(3, (100, 100)).eval()
-        self.model.load_state_dict(torch.load(model_pt_file, weights_only=True))
-        self.lite_mtcnn = LiteMTCNN().eval()
+    def __init__(self, model_pt_file: str, model: LiteFace100 = None, lite_mtcnn: LiteMTCNN = None):
+        if model:
+            self.model = model
+        else:
+            self.model = LiteFace100(3, (100, 100)).eval()
+            self.model.load_state_dict(torch.load(model_pt_file, weights_only=True))
+
+        if lite_mtcnn:
+            self.lite_mtcnn = lite_mtcnn
+        else:
+            self.lite_mtcnn = LiteMTCNN().eval()
+
         self.known_embeddings = []
         self.names = []
         self.transform = Compose([ToTensor(), Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])])
@@ -22,6 +30,9 @@ class FaceRecognition:
         self.margin = 0.97
         self.similarity_split = 0.8
         self.similarity_number = 4
+
+    def create_copy(self):
+        return FaceRecognition('', self.model, self.lite_mtcnn)
 
     def add_known_person(self, files: list, name: str, is_aligned: bool = False):
         images = []
