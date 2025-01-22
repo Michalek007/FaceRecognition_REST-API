@@ -3,6 +3,7 @@ import flask_login
 
 from app.blueprints import BlueprintSingleton
 from app.blueprints.auth.modules import User, Authenticator
+from database.schemas import User as UserDb
 
 
 class AuthBp(BlueprintSingleton):
@@ -12,13 +13,8 @@ class AuthBp(BlueprintSingleton):
 
     # views
     def user_loader(self, login):
-        # TODO: implement -> database user verification
-        # verification = current_app.config.get('db').verify_user(login, 'password')
-        verification = True
-        test = None
-        if verification:
-            test = True
-        if test is None:
+        user_obj = UserDb.query.filter_by(username=login).first()
+        if not user_obj:
             return
         user = User()
         user.id = login

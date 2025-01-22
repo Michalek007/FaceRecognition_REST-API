@@ -41,6 +41,12 @@ def new():
     return MembersBp().new()
 
 
+@members_bp.route('/exists/', methods=['GET'])
+@flask_login.login_required
+def exists():
+    return MembersBp().exists()
+
+
 @members_bp.route('/table/', methods=['GET'])
 @flask_login.login_required
 def table():

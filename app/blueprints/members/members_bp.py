@@ -81,6 +81,8 @@ class MembersBp(BlueprintSingleton):
         user_id = flask_login.current_user.id
         image_id = f'temp_member_{user_id}'
         try:
+            if request.files.get('file').content_type != 'image/jpeg':
+                return jsonify(message=f'File not found in request body! Expected file: jpeg image. '), 404
             filename = os.path.join(current_app.config.get('TEMP_UPLOAD_DIR'), f'{image_id}.jpg')
             request.files.get('file').save(filename)
         except AttributeError:
@@ -113,7 +115,7 @@ class MembersBp(BlueprintSingleton):
         user_id = flask_login.current_user.id
         image_id = f'temp_member_{user_id}'
         exists = False
-        if Members.query.filter_by(name=name).first():
+        if Members.query.filter_by(user_id=user_id, name=name).first():
             exists = True
 
         filename = name.replace(' ', '')
@@ -165,6 +167,15 @@ class MembersBp(BlueprintSingleton):
         if exists:
             return jsonify(message=f'Added new photo for member {name}!')
         return jsonify(message='New member added!')
+
+    def exists(self):
+        user_id = flask_login.current_user.id
+        name = request.args.get("name")
+        if not name:
+            return jsonify(message=f'Member name was not provided.'), 404
+        if Members.query.filter_by(user_id=user_id, name=name).first():
+            return jsonify(exists=True)
+        return jsonify(exists=False)
 
     # gui views
     def table(self):

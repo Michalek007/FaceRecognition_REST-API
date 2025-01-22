@@ -5,5 +5,6 @@ from app.blueprints.face_recognition.face_recognition_bp import FaceRecognitionB
 
 
 @face_recognition_bp.route("/recognize/", methods=['POST'])
+@flask_login.login_required
 def recognize():
     return FaceRecognitionBp().recognize()

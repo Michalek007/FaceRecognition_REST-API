@@ -6,8 +6,6 @@
 {% endblock %}
 
 {% block body %}
-    <script> </script>
-
     <h1> Add member </h1>
     <div class="container">
         <img src="{{ member_image }}" alt="Member image" />
@@ -39,4 +37,28 @@
             </div>
         </form>
     {% endif %}
+
+    <script>
+    function checkIfExists(name) {
+        fetch("{{url_for('members.exists')}}" + "?name=" + name)
+          .then(response => response.json())
+          .then(data => {
+              if (data["exists"]){
+                alert("Member with provided name already exists. If you click Add button, image will be added for this member. ")
+              }
+          })
+          .catch(error => {
+            console.error(error);
+          });
+      }
+    // Get the input element
+    const inputBox = document.getElementById('name');
+
+    // Add an event listener for the input event
+    inputBox.addEventListener('input', (event) => {
+        {#console.log('User typed:', event.target.value);#}
+        checkIfExists(event.target.value)
+    });
+    </script>
+
 {% endblock %}

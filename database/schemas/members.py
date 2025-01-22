@@ -10,7 +10,7 @@ class Members(db.Model):
     __tablename__ = 'members'
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer)
-    name = Column(String, unique=True)
+    name = Column(String)
     embedding = Column(String)
     image = Column(String)
 

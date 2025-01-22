@@ -1,4 +1,5 @@
 from flask import request, url_for, redirect, render_template, jsonify, current_app
+import flask_login
 import os
 import struct
 import torch
@@ -33,13 +34,17 @@ class FaceRecognitionBp(BlueprintSingleton):
         embedding = request.args.get('embedding')
         in_place = request.args.get('in_place')
 
-        user = User.query.filter_by(device_id=device_id).first()
-        if not user:
-            return jsonify(message="Unauthorised device id. "), 404
-        user_id = user.username
+        user_id = flask_login.current_user.id
+        if user_id == current_app.config.get('TOKEN'):
+            user = User.query.filter_by(device_id=device_id).first()
+            if not user:
+                return jsonify(message="Unauthorised device id. "), 404
+            user_id = user.username
+
         scheduler = current_app.config.get('scheduler')
         scheduler_jobs = scheduler.get_jobs()
 
+        print(user_id)
         print(request.content_type)
         print(request.content_length)
         print(aligned)
